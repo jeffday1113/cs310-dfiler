@@ -9,16 +9,19 @@ package virtualdisk;
 import java.io.RandomAccessFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import common.Constants;
 import common.Constants.DiskOperationType;
 import dblockcache.DBuffer;
 
-public abstract class VirtualDisk implements IVirtualDisk {
+public abstract class VirtualDisk implements IVirtualDisk, Runnable{
 
 	private String _volName;
 	private RandomAccessFile _file;
 	private int _maxVolSize;
+	private Queue<DiskRequest> myRequestQueue;
 
 	/*
 	 * VirtualDisk Constructors
@@ -46,6 +49,8 @@ public abstract class VirtualDisk implements IVirtualDisk {
 			formatStore();
 		}
 		/* Other methods as required */
+		
+		myRequestQueue=new LinkedList<DiskRequest>();
 	}
 	
 	public VirtualDisk(boolean format) throws FileNotFoundException,
@@ -96,7 +101,7 @@ public abstract class VirtualDisk implements IVirtualDisk {
 	 * Reads the buffer associated with DBuffer to the underlying
 	 * device/disk/volume
 	 */
-	private int readBlock(DBuffer buf) throws IOException {
+	protected int readBlock(DBuffer buf) throws IOException {
 		int seekLen = buf.getBlockID() * Constants.BLOCK_SIZE;
 		/* Boundary check */
 		if (_maxVolSize < seekLen + Constants.BLOCK_SIZE) {
@@ -110,7 +115,7 @@ public abstract class VirtualDisk implements IVirtualDisk {
 	 * Writes the buffer associated with DBuffer to the underlying
 	 * device/disk/volume
 	 */
-	private void writeBlock(DBuffer buf) throws IOException {
+	protected void writeBlock(DBuffer buf) throws IOException {
 		int seekLen = buf.getBlockID() * Constants.BLOCK_SIZE;
 		_file.seek(seekLen);
 		_file.write(buf.getBuffer(), 0, Constants.BLOCK_SIZE);
