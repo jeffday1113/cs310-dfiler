@@ -71,7 +71,14 @@ public class MyDFS extends DFS{
 
 	@Override
 	public void destroyDFile(DFileID dFID) {
-		// TODO Auto-generated method stub
+		//Get the file associated with the fileID and the blocks
+		DFile fileToDestroy = myFileIDMap.get(dFID.getDFileID());
+		List<Integer> fileBlocks = fileToDestroy.getBlocks();
+		for (Integer i : fileBlocks){
+			myAllocatedBlocks.remove(i);
+			myFreeBlocks.add(i);
+		}
+		myFileIDMap.remove(dFID.getDFileID());
 		
 	}
 
