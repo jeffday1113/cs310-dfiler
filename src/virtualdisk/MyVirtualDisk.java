@@ -11,12 +11,20 @@ import dblockcache.DBuffer;
 
 public class MyVirtualDisk extends VirtualDisk{
 
-	private Queue<DiskRequest> myRequestQueue;
+	private Queue<DiskRequest> myRequestQueue = new LinkedList<DiskRequest>();
+	
+	public MyVirtualDisk(String volName, boolean format) throws FileNotFoundException, IOException{
+		super(volName, format);
+	}
+	
+	public MyVirtualDisk(boolean format) throws FileNotFoundException, IOException{
+		super(format);
+	}
 
 	public MyVirtualDisk() throws FileNotFoundException, IOException {
 		super();
 		// TODO Auto-generated constructor stub
-		myRequestQueue = new LinkedList<DiskRequest>();
+		
 	}
 
 	@Override

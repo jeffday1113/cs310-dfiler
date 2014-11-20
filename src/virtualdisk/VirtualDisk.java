@@ -21,7 +21,6 @@ public abstract class VirtualDisk implements IVirtualDisk, Runnable{
 	private String _volName;
 	private RandomAccessFile _file;
 	private int _maxVolSize;
-	private Queue<DiskRequest> myRequestQueue;
 
 	/*
 	 * VirtualDisk Constructors
@@ -50,7 +49,6 @@ public abstract class VirtualDisk implements IVirtualDisk, Runnable{
 		}
 		/* Other methods as required */
 		
-		myRequestQueue=new LinkedList<DiskRequest>();
 	}
 	
 	public VirtualDisk(boolean format) throws FileNotFoundException,
