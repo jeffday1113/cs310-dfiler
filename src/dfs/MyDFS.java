@@ -78,6 +78,7 @@ public class MyDFS extends DFS{
 			myAllocatedBlocks.remove(i);
 			myFreeBlocks.add(i);
 		}
+		
 		myFileIDMap.remove(dFID.getDFileID());
 		
 	}
@@ -102,8 +103,11 @@ public class MyDFS extends DFS{
 
 	@Override
 	public List<DFileID> listAllDFiles() {
-		// TODO Auto-generated method stub
-		return null;
+		List<DFileID> allFilesList = new ArrayList<DFileID>();
+		for (Integer i : myFileIDMap.keySet()){
+			allFilesList.add(myFileIDMap.get(i).getID());
+		}
+		return allFilesList;
 	}
 
 	@Override

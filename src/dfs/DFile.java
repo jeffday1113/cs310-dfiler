@@ -24,7 +24,7 @@ public class DFile {
 		return size;
 	}
 	
-	public DFileID id(){
+	public DFileID getID(){
 		return myFileID;
 	}
 	
