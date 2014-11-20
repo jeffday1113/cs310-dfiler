@@ -5,7 +5,7 @@ import common.Constants;
 
 public class INode {
 	
-	public byte[] makeByteArrayInodeFromDFile(DFile d){
+	public static byte[] makeByteArrayInodeFromDFile(DFile d){
 		byte[] ret = new byte[ Constants.INODE_SIZE ];
 		byte[] sizeBytes = ByteBuffer.allocate(4).putInt(d.size()).array();
 		byte[] idBytes = ByteBuffer.allocate(4).putInt(d.id().getDFileID()).array();

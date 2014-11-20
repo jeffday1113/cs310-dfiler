@@ -1,25 +1,29 @@
 package dfs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import common.Constants;
 import common.DFileID;
 
 public class MyDFS extends DFS{
 	
-	private Set<Integer> myAllocatedBlocks;
-	private Set<Integer> myFreeBlocks;
-	private Map<DFileID, DFile> myFileIDMap;
+	private SortedSet<Integer> myAllocatedBlocks;
+	private SortedSet<Integer> myFreeBlocks;
+	private Map<Integer, DFile> myFileIDMap;
 	
 	MyDFS(String volName, boolean format) {
 		super(volName, format);
-		myAllocatedBlocks=new HashSet<Integer>();
-		myFreeBlocks=new HashSet<Integer>();
-		myFileIDMap = new HashMap<DFileID, DFile>();
+		myAllocatedBlocks=new TreeSet<Integer>();
+		myFreeBlocks=new TreeSet<Integer>();
+		myFileIDMap = new HashMap<Integer, DFile>();
 	}
 
 	MyDFS(boolean format) {
@@ -41,7 +45,28 @@ public class MyDFS extends DFS{
 	@Override
 	public DFileID createDFile() {
 		// TODO Auto-generated method stub
-		return null;
+		int newIDNum=0;
+		while (myFileIDMap.containsKey(newIDNum))
+			newIDNum++;
+		DFileID newFileID = new DFileID(newIDNum);
+		myAllocatedBlocks.add(myFreeBlocks.first());
+		myFreeBlocks.remove(myFreeBlocks.first());
+		List<Integer> newBlockList = new ArrayList<Integer>();
+		newBlockList.add(myAllocatedBlocks.first());
+		DFile newFile = new DFile(newFileID, newBlockList);
+		myFileIDMap.put(newIDNum, newFile);
+		
+		
+		byte[] newINode = INode.makeByteArrayInodeFromDFile(newFile);
+		
+		writeINode(newINode);
+		
+		return newFileID;
+	}
+	
+	private void writeINode(byte[] inode){
+		
+		
 	}
 
 	@Override
