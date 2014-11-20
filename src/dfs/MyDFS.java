@@ -1,7 +1,9 @@
 package dfs;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import common.Constants;
@@ -11,11 +13,13 @@ public class MyDFS extends DFS{
 	
 	private Set<Integer> myAllocatedBlocks;
 	private Set<Integer> myFreeBlocks;
+	private Map<DFileID, DFile> myFileIDMap;
 	
 	MyDFS(String volName, boolean format) {
 		super(volName, format);
 		myAllocatedBlocks=new HashSet<Integer>();
 		myFreeBlocks=new HashSet<Integer>();
+		myFileIDMap = new HashMap<DFileID, DFile>();
 	}
 
 	MyDFS(boolean format) {
