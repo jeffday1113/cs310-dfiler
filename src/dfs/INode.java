@@ -7,7 +7,7 @@ public class INode {
 	
 	public static byte[] makeByteArrayInodeFromDFile(DFile d){
 		byte[] ret = new byte[ Constants.INODE_SIZE ];
-		byte[] sizeBytes = ByteBuffer.allocate(4).putInt(d.size()).array();
+		byte[] sizeBytes = ByteBuffer.allocate(4).putInt(d.getSize()).array();
 		byte[] idBytes = ByteBuffer.allocate(4).putInt(d.getID().getDFileID()).array();
 		for(int i = 0; i < 4; i++){
 			ret[i] = sizeBytes[i];

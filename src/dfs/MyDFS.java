@@ -98,7 +98,8 @@ public class MyDFS extends DFS{
 	@Override
 	public int sizeDFile(DFileID dFID) {
 		// TODO Auto-generated method stub
-		return 0;
+		DFile file = myFileIDMap.get(dFID.getDFileID());
+		return file.getSize();
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public class DFile {
 		size = blocks.size();
 	}
 	
-	public int size(){
+	public int getSize(){
 		return size;
 	}
 	
