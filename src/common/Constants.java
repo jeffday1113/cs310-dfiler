@@ -15,7 +15,7 @@ public class Constants {
 
 	public static final int NUM_OF_BLOCKS = 262144; // 2^18
 	public static final int BLOCK_SIZE = 1024; // 1kB
-	public static final int INODE_SIZE = 32; //32 Bytes
+	public static final int INODE_SIZE = 1024; //32 Bytes
 	public static final int NUM_OF_CACHE_BLOCKS = 65536; // 2^16
 	public static final int MAX_FILE_SIZE = BLOCK_SIZE*500; // Constraint on the max file size
 
