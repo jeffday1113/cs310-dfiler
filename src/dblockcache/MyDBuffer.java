@@ -8,6 +8,7 @@ public class MyDBuffer extends DBuffer{
 	@Override
 	public void startFetch() {
 		// TODO Auto-generated method stub
+		
 		isClean = true;
 	}
 
