@@ -1,5 +1,7 @@
 package dfs;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,14 +12,17 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import virtualdisk.MyVirtualDisk;
 import common.Constants;
 import common.DFileID;
+import dblockcache.MyDBufferCache;
 
 public class MyDFS extends DFS{
 	
 	private SortedSet<Integer> myAllocatedBlocks;
 	private SortedSet<Integer> myFreeBlocks;
 	private Map<Integer, DFile> myFileIDMap;
+	private MyDBufferCache dBuffCache;
 	
 	MyDFS(String volName, boolean format) {
 		super(volName, format);
@@ -37,9 +42,11 @@ public class MyDFS extends DFS{
 	
 	
 	@Override
-	public void init() {
+	public void init() throws FileNotFoundException, IOException {
 		// TODO Auto-generated method stub
-		
+		dBuffCache = new MyDBufferCache(Constants.NUM_OF_CACHE_BLOCKS);
+		MyVirtualDisk disk = new MyVirtualDisk(_volName, _format);
+		dBuffCache.giveDisk(disk);
 	}
 
 	@Override

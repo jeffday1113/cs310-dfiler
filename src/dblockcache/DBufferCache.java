@@ -1,17 +1,22 @@
 package dblockcache;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import common.Constants;
 
 public abstract class DBufferCache {
 	
-	private int _cacheSize;
+	protected int _cacheSize;
+	
 	
 	/*
 	 * Constructor: allocates a cacheSize number of cache blocks, each
 	 * containing BLOCK-size bytes data, in memory
 	 */
 	public DBufferCache(int cacheSize) {
-		_cacheSize = cacheSize * Constants.BLOCK_SIZE;
+		_cacheSize = cacheSize;
+		
 	}
 	
 	/*

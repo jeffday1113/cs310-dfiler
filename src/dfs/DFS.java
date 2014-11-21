@@ -1,5 +1,7 @@
 package dfs;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import common.Constants;
@@ -29,7 +31,7 @@ public abstract class DFS {
 	}
 
 	/* Initialize all the necessary structures with sizes as specified in the common/Constants.java */
-	public abstract void init();
+	public abstract void init() throws FileNotFoundException, IOException;
 
 	/* creates a new DFile and returns the DFileID, which is useful to uniquely identify the DFile*/
 	public abstract DFileID createDFile();
