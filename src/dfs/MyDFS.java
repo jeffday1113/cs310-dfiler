@@ -53,15 +53,20 @@ public class MyDFS extends DFS{
 	}
 
 	@Override
-	public DFileID createDFile() {
+	public synchronized DFileID createDFile() {
 		// TODO Auto-generated method stub
 		int newIDNum=1;
-		while (myFileIDMap.containsKey(newIDNum))
+		while (myFileIDMap.containsKey(newIDNum)){
 			newIDNum++;
+		}
 		DFileID newFileID = new DFileID(newIDNum);
+		//right now these keep track of all blocks - should only keep track of non-inodes
+		//make sure to initialize these in init
+		//should really change the structure of this
 		myAllocatedBlocks.add(myFreeBlocks.first());
 		myFreeBlocks.remove(myFreeBlocks.first());
 		List<Integer> newBlockList = new ArrayList<Integer>();
+		//does this work? not sure how sortedsets work...should do differently
 		newBlockList.add(myAllocatedBlocks.first());
 		DFile newFile = new DFile(newFileID, newBlockList);
 		myFileIDMap.put(newIDNum, newFile);
@@ -85,7 +90,7 @@ public class MyDFS extends DFS{
 	}
 
 	@Override
-	public void destroyDFile(DFileID dFID) {
+	public synchronized void destroyDFile(DFileID dFID) {
 		//Get the file associated with the fileID and the blocks
 		DFile fileToDestroy = myFileIDMap.get(dFID.getDFileID());
 		List<Integer> fileBlocks = fileToDestroy.getBlocks();
@@ -95,24 +100,29 @@ public class MyDFS extends DFS{
 		}
 		
 		myFileIDMap.remove(dFID.getDFileID());
+		//prevents initialization errors
+		writeINode(fileToDestroy);
 		
 	}
 
 	@Override
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		// TODO Auto-generated method stub
+		//logic to pull each individual block i dont feel like writing it now
 		return 0;
 	}
 
 	@Override
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		// TODO Auto-generated method stub
+		//same as above but make sure to have a check to see if need to add more blocks to file
 		return 0;
 	}
 
 	@Override
 	public int sizeDFile(DFileID dFID) {
 		// TODO Auto-generated method stub
+		//this should really be a method of DFile..
 		DFile file = myFileIDMap.get(dFID.getDFileID());
 		return file.getSize();
 	}
@@ -121,15 +131,15 @@ public class MyDFS extends DFS{
 	public List<DFileID> listAllDFiles() {
 		List<DFileID> allFilesList = new ArrayList<DFileID>();
 		for (Integer i : myFileIDMap.keySet()){
-			allFilesList.add(myFileIDMap.get(i).getID());
+			allFilesList.add(new DFileID(i));
 		}
 		return allFilesList;
 	}
 
 	@Override
-	public void sync() {
+	public synchronized void sync() {
 		// TODO Auto-generated method stub
-		
+		dBuffCache.sync();
 	}
 	
 	private byte[] makeByteArrayInodeFromDFile(DFile d){
