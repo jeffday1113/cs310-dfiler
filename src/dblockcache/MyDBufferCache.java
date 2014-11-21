@@ -40,18 +40,10 @@ public class MyDBufferCache extends DBufferCache{
 				findLRUAndRemove();
 			}
 			d = new MyDBuffer();
-			try {
-				disk.startRequest(d, Constants.DiskOperationType.READ);
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			d.setBusy(true);
 			mapOfDBuffs.put(blockID, d);
 			return d;
+			//returns a block which hasn't performed I/O, DFS tells it I/O...i think
 		}
 	}
 	
