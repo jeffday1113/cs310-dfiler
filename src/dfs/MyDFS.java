@@ -2,6 +2,7 @@ package dfs;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.TreeSet;
 import virtualdisk.MyVirtualDisk;
 import common.Constants;
 import common.DFileID;
+import dblockcache.DBuffer;
 import dblockcache.MyDBufferCache;
 
 public class MyDFS extends DFS{
@@ -47,12 +49,13 @@ public class MyDFS extends DFS{
 		dBuffCache = new MyDBufferCache(Constants.NUM_OF_CACHE_BLOCKS);
 		MyVirtualDisk disk = new MyVirtualDisk(_volName, _format);
 		dBuffCache.giveDisk(disk);
+		//need to check disk inodes and see if files exist!!!
 	}
 
 	@Override
 	public DFileID createDFile() {
 		// TODO Auto-generated method stub
-		int newIDNum=0;
+		int newIDNum=1;
 		while (myFileIDMap.containsKey(newIDNum))
 			newIDNum++;
 		DFileID newFileID = new DFileID(newIDNum);
@@ -63,17 +66,22 @@ public class MyDFS extends DFS{
 		DFile newFile = new DFile(newFileID, newBlockList);
 		myFileIDMap.put(newIDNum, newFile);
 		
-		
-		byte[] newINode = INode.makeByteArrayInodeFromDFile(newFile);
-		
-		writeINode(newINode);
+		writeINode(newFile);
 		
 		return newFileID;
 	}
 	
-	private void writeINode(byte[] inode){
+	private void writeINode(DFile fil){
+		//need to request block associated with file - needs more arguments
+		//then writes to that block, then pushes block
+		byte[] newINode = makeByteArrayInodeFromDFile(fil);
 		
+		//the file needs to know its inode location - we can make it its ID if
+		//the id's are given in the right manner
 		
+		DBuffer db = dBuffCache.getBlock(fil.getID().getDFileID());
+		db.write(newINode, 0, Constants.BLOCK_SIZE);
+		db.startPush();
 	}
 
 	@Override
@@ -122,6 +130,25 @@ public class MyDFS extends DFS{
 	public void sync() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private byte[] makeByteArrayInodeFromDFile(DFile d){
+		byte[] ret = new byte[ Constants.INODE_SIZE ];
+		byte[] sizeBytes = ByteBuffer.allocate(4).putInt(d.getSize()).array();
+		byte[] idBytes = ByteBuffer.allocate(4).putInt(d.getID().getDFileID()).array();
+		for(int i = 0; i < 4; i++){
+			ret[i] = sizeBytes[i];
+			ret[i+4] = idBytes[i];
+		}
+		int pos = 8;
+		for(Integer i:d.getBlocks()){
+			byte[] mapBytes = ByteBuffer.allocate(4).putInt(i).array();
+			for(int j = 0; j < 4; j++){
+				ret[j + pos] = mapBytes[j];
+			}
+			pos = pos+4;
+		}
+		return ret;
 	}
 
 }

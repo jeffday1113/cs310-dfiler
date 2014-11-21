@@ -5,23 +5,6 @@ import common.Constants;
 
 public class INode {
 	
-	public static byte[] makeByteArrayInodeFromDFile(DFile d){
-		byte[] ret = new byte[ Constants.INODE_SIZE ];
-		byte[] sizeBytes = ByteBuffer.allocate(4).putInt(d.getSize()).array();
-		byte[] idBytes = ByteBuffer.allocate(4).putInt(d.getID().getDFileID()).array();
-		for(int i = 0; i < 4; i++){
-			ret[i] = sizeBytes[i];
-			ret[i+4] = idBytes[i];
-		}
-		int pos = 8;
-		for(Integer i:d.getBlocks()){
-			byte[] mapBytes = ByteBuffer.allocate(4).putInt(i).array();
-			for(int j = 0; j < 4; j++){
-				ret[j + pos] = mapBytes[j];
-			}
-			pos = pos+4;
-		}
-		return ret;
-	}
+	
 
 }

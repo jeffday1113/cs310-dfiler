@@ -3,11 +3,12 @@ package dblockcache;
 public class MyDBuffer extends DBuffer{
 	
 	boolean isBusy;
+	boolean isClean;
 
 	@Override
 	public void startFetch() {
 		// TODO Auto-generated method stub
-		
+		isClean = true;
 	}
 
 	@Override
@@ -60,6 +61,7 @@ public class MyDBuffer extends DBuffer{
 	@Override
 	public int write(byte[] buffer, int startOffset, int count) {
 		// TODO Auto-generated method stub
+		isClean = false;
 		return 0;
 	}
 
