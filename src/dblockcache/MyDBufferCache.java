@@ -20,8 +20,7 @@ public class MyDBufferCache extends DBufferCache{
 		super(cacheSize);
 		// TODO Auto-generated constructor stub
 		mapOfDBuffs = new HashMap<Integer, DBuffer>();
-		//can keep track of dirty ones from DFS
-		//dirtyList = new ArrayList<DBuffer>();
+		dirtyList = new ArrayList<DBuffer>();
 	}
 
 	@Override
@@ -32,7 +31,7 @@ public class MyDBufferCache extends DBufferCache{
 		if((d = mapOfDBuffs.get(blockID))!=null){
 			//marks as busy then gives up control 
 			//busy call should probably be made from DFS
-			d.isBusy();
+			d.setBusy(true);;
 			return d;
 		}
 		//if not, check if full, if it is find LRU, then request it from the vdf and wait, then return	
@@ -42,7 +41,7 @@ public class MyDBufferCache extends DBufferCache{
 			}
 			d = new MyDBuffer();
 			try {
-				disk.startRequest(d, Constants.DiskOperationType.WRITE);
+				disk.startRequest(d, Constants.DiskOperationType.READ);
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -50,7 +49,7 @@ public class MyDBufferCache extends DBufferCache{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			d.isBusy();
+			d.setBusy(true);
 			mapOfDBuffs.put(blockID, d);
 			return d;
 		}
@@ -65,13 +64,24 @@ public class MyDBufferCache extends DBufferCache{
 	public void releaseBlock(DBuffer buf) {
 		//mark block as not held
 		// TODO Auto-generated method stub
+		buf.setBusy(false);
 		
 	}
 
 	@Override
-	public void sync() {
+	public synchronized void sync() {
 		// TODO Auto-generated method stub
-		
+		for(DBuffer d : dirtyList){
+			try {
+				disk.startRequest(d, Constants.DiskOperationType.WRITE);
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void giveDisk(MyVirtualDisk d){

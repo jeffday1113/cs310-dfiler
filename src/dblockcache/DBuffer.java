@@ -46,5 +46,9 @@ public abstract class DBuffer {
 	public abstract int getBlockID();
 	
 	/* An upcall from VirtualDisk layer to fetch the buffer associated with DBuffer object*/
-	public abstract byte[] getBuffer(); 
+	public abstract byte[] getBuffer();
+
+	public void setBusy(boolean b) {
+		// TODO Auto-generated method stub
+	} 
 }

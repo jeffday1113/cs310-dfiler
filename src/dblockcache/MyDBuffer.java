@@ -1,6 +1,8 @@
 package dblockcache;
 
 public class MyDBuffer extends DBuffer{
+	
+	boolean isBusy;
 
 	@Override
 	public void startFetch() {
@@ -41,7 +43,12 @@ public class MyDBuffer extends DBuffer{
 	@Override
 	public boolean isBusy() {
 		// TODO Auto-generated method stub
-		return false;
+		return isBusy;
+	}
+	
+	@Override
+	public void setBusy(boolean b){
+		isBusy = b;
 	}
 
 	@Override
