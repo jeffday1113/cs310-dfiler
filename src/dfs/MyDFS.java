@@ -51,6 +51,7 @@ public class MyDFS extends DFS{
 		dBuffCache.giveDisk(disk);
 		//need to check disk inodes and see if files exist!!!
 		
+		//I don't think there will be anything in the myFileIDMap at this point
 		
 		 // Initialize the free and allocated blocks on the virtual disk
 		  for (DFile file : myFileIDMap.values()) {
@@ -130,6 +131,7 @@ public class MyDFS extends DFS{
 		// TODO Auto-generated method stub
 		//logic to pull each individual block i dont feel like writing it now
 		 DFile file = myFileIDMap.get(dFID.getDFileID());
+		 
 	        if (file == null) return -1;
 	        int numblocks = file.getBlocks().size();
 	        int offset = startOffset;
