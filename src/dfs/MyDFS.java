@@ -52,7 +52,30 @@ public class MyDFS extends DFS{
 		//need to check disk inodes and see if files exist!!!
 		
 		//I don't think there will be anything in the myFileIDMap at this point
-		
+		//Build the dfiles
+		  for (int id : myFileIDMap.keySet()) {
+	            DFile d = myFileIDMap.get(id);
+	            // Check that the size of each DFile is a legal value
+	            if (d.getSize() > common.Constants.MAX_FILE_SIZE
+	                    * Constants.BLOCK_SIZE)
+					try {
+						throw new Exception();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	            // Check that the block maps of all DFiles have a valid block
+	            // number for every block in the DFile
+	            for (int i = 0; i < d.getBlocks().size(); i++) {
+	                if (d.getPhysicalBlockNumber(i) > common.Constants.NUM_OF_BLOCKS)
+						try {
+							throw new Exception();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+	            }
+	        }
 		 // Initialize the free and allocated blocks on the virtual disk
 		  for (DFile file : myFileIDMap.values()) {
 	            for (int j = 0; j < Constants.BLOCK_SIZE; j++) {
