@@ -12,6 +12,7 @@ public class DFile {
 	private int myNumWriters;
 	private int size;
 	
+	
 	public DFile (DFileID fileID, List<Integer> blocks){
 		myFileID=fileID;
 		myBlocks=blocks;

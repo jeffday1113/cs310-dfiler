@@ -39,7 +39,7 @@ public class MyDBufferCache extends DBufferCache{
 			if(mapOfDBuffs.values().size() == _cacheSize){
 				findLRUAndRemove();
 			}
-			d = new MyDBuffer();
+			d = new MyDBuffer(disk, blockID);
 			d.setBusy(true);
 			mapOfDBuffs.put(blockID, d);
 			return d;
