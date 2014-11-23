@@ -44,29 +44,38 @@ public class MyDFS extends DFS{
 	
 	
 	@Override
-	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
-		// TODO Auto-generated method stub
-		//same as above but make sure to have a check to see if need to add more blocks to file
-	    	DFile file = myFileIDMap.get(dFID.getDFileID());
-		if (file == null) return -1;
-		//free and add blocks
-		 int numblocks = file.getBlocks().size();
-	        int offset = startOffset;
-	        int done = count;
+	public void init() throws FileNotFoundException, IOException {
+		dBuffCache = new MyDBufferCache(Constants.NUM_OF_CACHE_BLOCKS);
+		MyVirtualDisk disk = new MyVirtualDisk(_volName, _format);
+		dBuffCache.giveDisk(disk);
+		
+		DBuffer block0 = dBuffCache.getBlock(0);
+		block0.startFetch();
+		block0.waitValid();
+		//check for info in block0 to make sure disk is chill
 
-	        for (int i = 0; i < numblocks; i++) {
-	            DBuffer d = dBuffCache.getBlock(file.getPhysicalBlockNumber(i));
+		for(int i = 1; i < Constants.MAX_DFILES; i++){
+			DBuffer inode = dBuffCache.getBlock(i);
+			inode.startFetch();
+			inode.waitValid();
+			DFile fil = makeDFileFromInode(inode);
+			if(fil != null){
+				myFileIDMap.put(i, fil);
+			}
+		}
+		
+		for(DFile fil:myFileIDMap.values()){
+			for(Integer i:fil.getBlocks()){
+				myAllocatedBlocks.add(i);
+			}
+		}
+		
+		for(int i = Constants.MAX_DFILES + 1; i < Constants.NUM_OF_BLOCKS; i++){
+			if(!myAllocatedBlocks.contains(i)){
+				myFreeBlocks.add(i);
+			}
+		}
 
-	            if (!d.checkValid()) {
-	                d.startFetch();
-	                d.waitValid();
-	            }
-
-	            int write = d.write(buffer, offset, done);
-	            done -= write;
-	            offset += write;
-	        }
-		return count;
 	}
 
 	@Override
