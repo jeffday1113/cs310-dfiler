@@ -31,5 +31,8 @@ public class DFile {
 	public List<Integer> getBlocks(){
 		return myBlocks;
 	}
-
+	public int getPhysicalBlockNumber (int block) {
+        if (block < 0 || block >= myBlocks.size()) return -1;
+        return myBlocks.get(block);
+    }
 }

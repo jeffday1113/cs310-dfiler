@@ -50,6 +50,26 @@ public class MyDFS extends DFS{
 		MyVirtualDisk disk = new MyVirtualDisk(_volName, _format);
 		dBuffCache.giveDisk(disk);
 		//need to check disk inodes and see if files exist!!!
+		
+		
+		 // Initialize the free and allocated blocks on the virtual disk
+		  for (DFile file : myFileIDMap.values()) {
+	            for (int j = 0; j < Constants.BLOCK_SIZE; j++) {
+	                int blockid = file.getPhysicalBlockNumber(j);
+	                if (blockid == -1) break;
+	                // Check that no data block is listed for more than one DFile
+	                if (blockid != 0) {
+	                    if (myAllocatedBlocks.contains(blockid)) { //invalid allocation }
+	                    myAllocatedBlocks.add(blockid);
+	                }
+	            }
+	        }
+		  }
+      for (int i = Constants.MAX_DFILES + 1; i < common.Constants.NUM_OF_BLOCKS; i++) {
+          if (!myAllocatedBlocks.contains(i)) {
+              myFreeBlocks.add(i);
+          }
+      }
 	}
 
 	@Override
@@ -109,14 +129,50 @@ public class MyDFS extends DFS{
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		// TODO Auto-generated method stub
 		//logic to pull each individual block i dont feel like writing it now
-		return 0;
-	}
+		 DFile file = myFileIDMap.get(dFID.getDFileID());
+	        if (file == null) return -1;
+	        int numblocks = file.getBlocks().size();
+	        int offset = startOffset;
+	        int done = count;
 
+	        for (int i = 0; i < numblocks; i++) {
+	            DBuffer d = dBuffCache.getBlock(file.getPhysicalBlockNumber(i));
+	            if (!d.checkValid()) {
+	                d.startFetch();
+	                d.waitValid();
+	            }
+
+	            int read = d.read(buffer, offset, done);
+	            done -= read;
+	            offset += read;
+	        }
+	       
+	        return count;
+	}
 	@Override
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		// TODO Auto-generated method stub
 		//same as above but make sure to have a check to see if need to add more blocks to file
-		return 0;
+	    DFile file = myFileIDMap.get(dFID.getDFileID());
+        if (file == null) return -1;
+//free and add blocks
+		 int numblocks = file.getBlocks().size();
+	        int offset = startOffset;
+	        int done = count;
+
+	        for (int i = 0; i < numblocks; i++) {
+	            DBuffer d = dBuffCache.getBlock(file.getPhysicalBlockNumber(i));
+
+	            if (!d.checkValid()) {
+	                d.startFetch();
+	                d.waitValid();
+	            }
+
+	            int write = d.write(buffer, offset, done);
+	            done -= write;
+	            offset += write;
+	        }
+		return count;
 	}
 
 	@Override
