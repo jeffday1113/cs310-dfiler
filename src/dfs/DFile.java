@@ -43,7 +43,7 @@ public class DFile {
         return myBlocks.get(block);
     }
 	
-	public void lockRead(){
+	public synchronized void lockRead(){
 		while(myNumWriters > 0 || myNumWaitingWriters > 0){
 			try {
 				wait();
@@ -54,7 +54,7 @@ public class DFile {
 		myNumReaders++;
 	}
 	
-	public void lockWrite(){
+	public synchronized void lockWrite(){
 		myNumWaitingWriters++;
 		while(myNumReaders > 0 || myNumWriters > 0){
 			try {
@@ -67,12 +67,12 @@ public class DFile {
 		myNumWaitingWriters--;
 	}
 	
-	public void releaseRead(){
+	public synchronized void releaseRead(){
 		myNumReaders--;
 		notifyAll();
 	}
 	
-	public void releaseWrite(){
+	public synchronized void releaseWrite(){
 		myNumWriters--;
 		notifyAll();
 	}
