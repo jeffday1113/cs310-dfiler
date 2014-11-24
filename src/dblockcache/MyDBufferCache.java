@@ -65,6 +65,9 @@ public class MyDBufferCache extends DBufferCache{
 			i++;
 		}
 		DBuffer d = lruList.remove(i);
+		if(!d.checkClean()){
+			d.startPush();
+		}
 		mapOfDBuffs.remove(d);
 	}
 
