@@ -105,7 +105,7 @@ public class MyDFS extends DFS{
 	private void writeINode(DFile fil){
 		//need to request block associated with file - needs more arguments
 		//then writes to that block, then pushes block
-		byte[] newINode = makeByteArrayInodeFromDFile(fil);
+		byte[] newINode = makeInodeFromDFile(fil);
 		
 		//the file needs to know its inode location - we can make it its ID if
 		//the id's are given in the right manner
@@ -205,6 +205,27 @@ public class MyDFS extends DFS{
 		dBuffCache.sync();
 	}
 	
+	private byte[] makeInodeFromDFile(DFile d){
+		byte[] ret = new byte[Constants.INODE_SIZE];
+		byte[] sizeBytes = ByteBuffer.allocate(4).putInt(d.getSize()).array();
+		byte[] idBytes = ByteBuffer.allocate(4).putInt(d.getID().getDFileID()).array();
+		for(int i = 0; i < 4; i++){
+			ret[i] = sizeBytes[i];
+			ret[i+4] = idBytes[i];
+		}
+		int pos = 8;
+		for(Integer i:d.getBlocks()){
+			byte[] mapBytes = ByteBuffer.allocate(4).putInt(i).array();
+			for(int j = 0; j < 4; j++){
+				ret[j + pos] = mapBytes[j];
+			}
+			pos = pos+4;
+		}
+		return ret;
+	}
+	
+
+	
 	private DFile makeDFileFromInode(DBuffer inode){
 		byte[] ret = new byte[Constants.INODE_SIZE];
 		inode.read(ret, 0, ret.length);
@@ -226,24 +247,5 @@ public class MyDFS extends DFS{
 		return dfil;
 	}
 
-	
-	private byte[] makeByteArrayInodeFromDFile(DFile d){
-		byte[] ret = new byte[ Constants.INODE_SIZE ];
-		byte[] sizeBytes = ByteBuffer.allocate(4).putInt(d.getSize()).array();
-		byte[] idBytes = ByteBuffer.allocate(4).putInt(d.getID().getDFileID()).array();
-		for(int i = 0; i < 4; i++){
-			ret[i] = sizeBytes[i];
-			ret[i+4] = idBytes[i];
-		}
-		int pos = 8;
-		for(Integer i:d.getBlocks()){
-			byte[] mapBytes = ByteBuffer.allocate(4).putInt(i).array();
-			for(int j = 0; j < 4; j++){
-				ret[j + pos] = mapBytes[j];
-			}
-			pos = pos+4;
-		}
-		return ret;
-	}
-
 }
+
