@@ -158,27 +158,34 @@ public class MyDFS extends DFS{
 	}
 	@Override
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
-		// TODO Auto-generated method stub
 		//same as above but make sure to have a check to see if need to add more blocks to file
-	    DFile file = myFileIDMap.get(dFID.getDFileID());
-        if (file == null) return -1;
-//free and add blocks
-		 int numblocks = file.getBlocks().size();
-	        int offset = startOffset;
-	        int done = count;
+		DFile file = myFileIDMap.get(dFID.getDFileID());
+		if (file == null) return -1;
+		//free and add blocks
+		
+		int numblocks = file.getBlocks().size();
+		int moreBlocks = (int) Math.ceil((double) count / Constants.BLOCK_SIZE) - numblocks;
+		int offset = startOffset;
+		int done = count;
+		if(moreBlocks > 0){
+			for(int i = 0; i < moreBlocks; i++){
+				file.addBlock(myFreeBlocks.first());
+				myAllocatedBlocks.add(myFreeBlocks.first());
+				myFreeBlocks.remove(myFreeBlocks.first());
+			}
+		}
+		for (int i = 0; i < numblocks; i++) {
+			DBuffer d = dBuffCache.getBlock(file.getPhysicalBlockNumber(i));
+			if (!d.checkValid()) {
+				d.startFetch();
+				d.waitValid();
+			}
 
-	        for (int i = 0; i < numblocks; i++) {
-	            DBuffer d = dBuffCache.getBlock(file.getPhysicalBlockNumber(i));
-
-	            if (!d.checkValid()) {
-	                d.startFetch();
-	                d.waitValid();
-	            }
-
-	            int write = d.write(buffer, offset, done);
-	            done -= write;
-	            offset += write;
-	        }
+			int write = d.write(buffer, offset, done);
+			done -= write;
+			offset += write;
+		}
+		writeINode(file);
 		return count;
 	}
 
