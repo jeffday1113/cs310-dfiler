@@ -21,6 +21,10 @@ public class DFile {
 		size = blocks.size();
 	}
 	
+	public void addBlock(int blockid){
+		myBlocks.add(blockid);
+	}
+	
 	public int getSize(){
 		return size;
 	}
