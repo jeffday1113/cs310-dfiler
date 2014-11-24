@@ -47,7 +47,7 @@
 
  While working on this lab, as suggested by the given PDF we divided our filing 
  system into three primary layers: the DFS at the top, the dbuffercache in the 
- middle, and the virtual disk at the bottom.
+ middle, and the virtual disk at the bottom.  The constants class specifies various aspects of the program, including number of blocks, the size of the blocks, the size of the inodes, max file size, and max number of files.
 
  DFS
 
@@ -58,34 +58,44 @@
  associated with the file, the size of the file, number of readers and the number 
  of writers).  The class also implements the details of dealing with multiple 
  threads attempting to read and write to the same file by utilizing synchronized 
- methods to incorporate locking.  The MyDFS class holds information regarding the 
- state of the entire filing system (allocated and freed blocks, map associating 
- fileID number with the actual file in the system, an instantiation of the 
- dbuffcache) and is the entry point into the file system.  Every test program 
- starts by calling DFS.init(), which instantiates a dbuffcache and a virtual 
- disk.  It then grabs block 0 from the dbuffcache and checks to see whether the 
- disk is valid.  Then, the inode blocks are scanned in from the dbuffcache and 
- files are recreated from the information stored in the inodes.  All the necessary state 
- stored in the DFS class is updated as well.  The DFS class also implements all 
- the necessary methods create, destroy, read, and write dfiles.  To create a file, 
- the DFS makes a new DFileID object with the lowest available file ID number, 
- allocates a block to that file, creates the file, updates the fileIDMap, and then 
- loads it into the dbuffcache.  To destroy a file, the allocated blocks associated 
- with the file are added back to the free list.  In order to read a file, the DFS 
- loops through the blocks associated with that file in the map, gets a DBuffer for 
- each block, and reads the data into a byte array while dealing with acquiring and 
- releasing of the read lock.  To write to a file, the DFS allocates more blocks to 
- the file to fit any more data that needs to be written, gets a DBuffer for each 
- block, writes the given byte array to the blocks and then releases the blocks to 
- be used later.  We also implemented private methods that create inodes for files 
- and can instantiate a file from an inode
+ methods to incorporate locking.  If a thread attempts to read the file while 
+ there are still writers or pending writes, the thread waits.  Similarly, if a 
+ thread attempts to write to a file while there are other threads reading it or 
+ waiting to read it, the thread waits.  Any time a thread releases the lock 
+ associated with the file, notifyAll() is called to wake up any waiting readers or 
+ writers.  The MyDFS class holds information regarding the state of the entire 
+ filing system (allocated and freed blocks, map associating fileID number with the 
+ actual file in the system, an instantiation of the dbuffcache) and is the entry 
+ point into the file system.  Every test program starts by calling DFS.init(), 
+ which instantiates a dbuffcache and a virtual disk.  It then grabs block 0 from 
+ the dbuffcache and checks to see whether the disk is valid.  Then, the inode 
+ blocks are scanned in from the dbuffcache and files are recreated from the 
+ information stored in the inodes.  All the necessary state stored in the DFS 
+ class is updated as well.  The DFS class also implements all the necessary 
+ methods create, destroy, read, and write dfiles.  To create a file, the DFS makes 
+ a new DFileID object with the lowest available file ID number, allocates a block 
+ to that file, creates the file, updates the fileIDMap, and then loads it into the 
+ dbuffcache.  To destroy a file, the allocated blocks associated with the file are 
+ added back to the free list.  In order to read a file, the DFS loops through the 
+ blocks associated with that file in the map, gets a DBuffer for each block, and 
+ reads the data into a byte array while dealing with acquiring and releasing of 
+ the read lock.  To write to a file, the DFS allocates more blocks to the file to 
+ fit any more data that needs to be written, gets a DBuffer for each block, writes 
+ the given byte array to the blocks and then releases the blocks to be used 
+ later.  We also implemented private methods that create inodes for files and can 
+ instantiate a file from an inode.
 
  DBufferCache
 
  The cache layer is implemented in two primary classes: MyDBuffer and 
  MyDBufferCache.  MyDBuffer represents a cache block in the simulated I/O cache 
  that stores data from disk and stores the state of the cache blocks (whether or 
- not it is busy, clean, and valid, the actual data itself).  MyDBufferCache 
+ not it is busy, clean, and valid, the actual data itself).  The MyDBuffer has 
+ methods implemented to fetch a block from disk, push dirty blocks to disk, and 
+ read and write data to the buffer itself.  In order to read, threads wait until 
+ the data associated with the block is valid, reads, and then notifies any wating 
+ threads that they can acces the block.  To write, threads copy the information 
+ and the notify waiting threads that they are done when finished.  MyDBufferCache 
  represents the actual cache itself, and stores a reference to the virtual disk, a 
  list of least recently used blocks, and a map of block numbers to acual 
  DBuffers.  The getBlock method in MyDBufferCache return a DBuffer object to the 
