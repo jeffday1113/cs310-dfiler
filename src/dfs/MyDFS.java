@@ -148,8 +148,6 @@ public class MyDFS extends DFS{
 	        			d.startFetch();
 	        			d.waitValid();
 	        		}
-
-
 	        		int read = d.read(buffer, offset, done);
 	        		done -= read;
 	        		offset += read;
