@@ -60,7 +60,11 @@ public class MyDBufferCache extends DBufferCache{
 	}
 	
 	private void findLRUAndRemove(){
-		DBuffer d = lruList.remove(0);
+		int i = 0;
+		while(lruList.get(i).isBusy()){
+			i++;
+		}
+		DBuffer d = lruList.remove(i);
 		mapOfDBuffs.remove(d);
 	}
 
