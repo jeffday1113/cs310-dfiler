@@ -4,12 +4,14 @@ import java.util.List;
 
 import common.DFileID;
 
+
 public class DFile {
 	
 	private DFileID myFileID;
 	private List<Integer> myBlocks;
 	private int myNumReaders;
 	private int myNumWriters;
+	private int myNumWaitingWriters;
 	private int size;
 	
 	
@@ -40,4 +42,38 @@ public class DFile {
         if (block < 0 || block >= myBlocks.size()) return -1;
         return myBlocks.get(block);
     }
+	
+	public void lockRead(){
+		while(myNumWriters > 0 || myNumWaitingWriters > 0){
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		myNumReaders++;
+	}
+	
+	public void lockWrite(){
+		myNumWaitingWriters++;
+		while(myNumReaders > 0 || myNumWriters > 0){
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		myNumWriters++;
+		myNumWaitingWriters--;
+	}
+	
+	public void releaseRead(){
+		myNumReaders--;
+		notifyAll();
+	}
+	
+	public void releaseWrite(){
+		myNumWriters--;
+		notifyAll();
+	}
 }
