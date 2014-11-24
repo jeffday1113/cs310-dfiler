@@ -102,6 +102,9 @@ public class MyDBuffer extends DBuffer{
 	@Override
 	public synchronized int read(byte[] buffer, int startOffset, int count) {
 		waitValid();
+		if(count > Constants.BLOCK_SIZE){
+			count = Constants.BLOCK_SIZE;
+		}
 		for(int i = startOffset, j = 0; j < count; j++, i++){
 			buffer[i] = dBuffer[j];
 		}
@@ -111,6 +114,9 @@ public class MyDBuffer extends DBuffer{
 
 	@Override
 	public synchronized int write(byte[] buffer, int startOffset, int count) {
+		if(count > Constants.BLOCK_SIZE){
+			count = Constants.BLOCK_SIZE;
+		}
 		for(int i = startOffset, j = 0; j < count; j++, i++){
 			dBuffer[j] = buffer[i];
 		}
