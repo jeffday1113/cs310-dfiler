@@ -80,7 +80,6 @@ public class MyDFS extends DFS{
 
 	@Override
 	public synchronized DFileID createDFile() {
-		// TODO Auto-generated method stub
 		int newIDNum=1;
 		while (myFileIDMap.containsKey(newIDNum)){
 			newIDNum++;
@@ -137,6 +136,7 @@ public class MyDFS extends DFS{
 		 DFile file = myFileIDMap.get(dFID.getDFileID());
 		 
 	        if (file == null) return -1;
+	        file.lockRead();
 	        int numblocks = file.getBlocks().size();
 	        int offset = startOffset;
 	        int done = count;
@@ -155,7 +155,7 @@ public class MyDFS extends DFS{
 	        		offset += read;
 	        	}
 	        }
-	       
+	       file.releaseRead();
 	        return count;
 	}
 	
@@ -166,6 +166,7 @@ public class MyDFS extends DFS{
 		if (file == null) return -1;
 		//free and add blocks
 		
+		file.lockWrite();
 		int numblocks = file.getBlocks().size();
 		int moreBlocks = (int) Math.ceil((double) count / Constants.BLOCK_SIZE) - numblocks;
 		int offset = startOffset;
@@ -189,6 +190,7 @@ public class MyDFS extends DFS{
 			offset += write;
 		}
 		writeINode(file);
+		file.releaseWrite();
 		return count;
 	}
 
@@ -258,4 +260,3 @@ public class MyDFS extends DFS{
 	}
 
 }
-
