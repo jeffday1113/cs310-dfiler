@@ -52,6 +52,7 @@ public class MyDFS extends DFS{
 		DBuffer block0 = dBuffCache.getBlock(0);
 		block0.startFetch();
 		block0.waitValid();
+		dBuffCache.releaseBlock(block0);
 		//check for info in block0 to make sure disk is chill
 
 		for(int i = 1; i < Constants.MAX_DFILES; i++){
@@ -62,6 +63,7 @@ public class MyDFS extends DFS{
 			if(fil != null){
 				myFileIDMap.put(i, fil);
 			}
+			dBuffCache.releaseBlock(inode);
 		}
 		
 		for(DFile fil:myFileIDMap.values()){
@@ -112,6 +114,7 @@ public class MyDFS extends DFS{
 		DBuffer db = dBuffCache.getBlock(fil.getID().getDFileID());
 		db.write(newINode, 0, Constants.BLOCK_SIZE);
 		db.startPush();
+		dBuffCache.releaseBlock(db);
 	}
 
 	@Override
@@ -151,6 +154,7 @@ public class MyDFS extends DFS{
 	        		int read = d.read(buffer, offset, done);
 	        		done -= read;
 	        		offset += read;
+	        		dBuffCache.releaseBlock(d);
 	        	}
 	        }
 	       file.releaseRead();
@@ -186,6 +190,7 @@ public class MyDFS extends DFS{
 			int write = d.write(buffer, offset, done);
 			done -= write;
 			offset += write;
+			dBuffCache.releaseBlock(d);
 		}
 		writeINode(file);
 		file.releaseWrite();
