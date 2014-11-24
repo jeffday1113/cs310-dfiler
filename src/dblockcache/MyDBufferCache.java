@@ -13,14 +13,13 @@ import virtualdisk.MyVirtualDisk;
 public class MyDBufferCache extends DBufferCache{
 	
 	private MyVirtualDisk disk;
-	private List<DBuffer> dirtyList;
+	private List<DBuffer> lruList;
 	private Map<Integer, DBuffer> mapOfDBuffs;
 
 	public MyDBufferCache(int cacheSize) {
 		super(cacheSize);
-		// TODO Auto-generated constructor stub
 		mapOfDBuffs = new HashMap<Integer, DBuffer>();
-		dirtyList = new ArrayList<DBuffer>();
+		lruList = new LinkedList<DBuffer>();
 	}
 
 	@Override
@@ -31,7 +30,8 @@ public class MyDBufferCache extends DBufferCache{
 		if((d = mapOfDBuffs.get(blockID))!=null){
 			//marks as busy then gives up control 
 			//busy call should probably be made from DFS
-			d.setBusy(true);;
+			d.setBusy(true);
+			promote(d);
 			return d;
 		}
 		//if not, check if full, if it is find LRU, then request it from the vdf and wait, then return	
@@ -42,20 +42,31 @@ public class MyDBufferCache extends DBufferCache{
 			d = new MyDBuffer(disk, blockID);
 			d.setBusy(true);
 			mapOfDBuffs.put(blockID, d);
+			promote(d);
 			return d;
 			//returns a block which hasn't performed I/O, DFS tells it I/O...i think
 		}
 	}
 	
-	private DBuffer findLRUAndRemove(){
-		//TODO:
-		return null;
+	private void promote(DBuffer d){
+		int pos;
+		if((pos = lruList.indexOf(d)) != -1){
+			lruList.remove(pos);
+			lruList.add(d);
+		}
+		else{
+			lruList.add(d);
+		}
+	}
+	
+	private void findLRUAndRemove(){
+		DBuffer d = lruList.remove(0);
+		mapOfDBuffs.remove(d);
 	}
 
 	@Override
 	public void releaseBlock(DBuffer buf) {
 		//mark block as not held
-		// TODO Auto-generated method stub
 		buf.setBusy(false);
 		
 	}
