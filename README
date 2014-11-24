@@ -47,7 +47,9 @@
 
  While working on this lab, as suggested by the given PDF we divided our filing 
  system into three primary layers: the DFS at the top, the dbuffercache in the 
- middle, and the virtual disk at the bottom.  The constants class specifies various aspects of the program, including number of blocks, the size of the blocks, the size of the inodes, max file size, and max number of files.
+ middle, and the virtual disk at the bottom.  The constants class specifies various 
+ aspects of the program, including number of blocks, the size of the blocks, the 
+ size of the inodes, max file size, and max number of files.
 
  DFS
 
@@ -63,20 +65,22 @@
  thread attempts to write to a file while there are other threads reading it or 
  waiting to read it, the thread waits.  Any time a thread releases the lock 
  associated with the file, notifyAll() is called to wake up any waiting readers or 
- writers.  The MyDFS class holds information regarding the state of the entire 
- filing system (allocated and freed blocks, map associating fileID number with the 
+ writers. We assign waiting writers priority due to the fact that threads don't 
+ want to read the old information. The MyDFS class holds information regarding 
+ the state of the entire filing system (allocated and freed blocks, map associating fileID number with the 
  actual file in the system, an instantiation of the dbuffcache) and is the entry 
  point into the file system.  Every test program starts by calling DFS.init(), 
  which instantiates a dbuffcache and a virtual disk.  It then grabs block 0 from 
- the dbuffcache and checks to see whether the disk is valid.  Then, the inode 
- blocks are scanned in from the dbuffcache and files are recreated from the 
+ the dbuffcache, which is where information would go to determine if the VDS is valid.
+ Then, the inode blocks are scanned in from the dbuffcache and files are recreated from the 
  information stored in the inodes.  All the necessary state stored in the DFS 
  class is updated as well.  The DFS class also implements all the necessary 
  methods create, destroy, read, and write dfiles.  To create a file, the DFS makes 
  a new DFileID object with the lowest available file ID number, allocates a block 
  to that file, creates the file, updates the fileIDMap, and then loads it into the 
  dbuffcache.  To destroy a file, the allocated blocks associated with the file are 
- added back to the free list.  In order to read a file, the DFS loops through the 
+ added back to the free list, and the inode is then updated so that it changes its
+ size to 0.  In order to read a file, the DFS loops through the 
  blocks associated with that file in the map, gets a DBuffer for each block, and 
  reads the data into a byte array while dealing with acquiring and releasing of 
  the read lock.  To write to a file, the DFS allocates more blocks to the file to 
@@ -93,16 +97,16 @@
  not it is busy, clean, and valid, the actual data itself).  The MyDBuffer has 
  methods implemented to fetch a block from disk, push dirty blocks to disk, and 
  read and write data to the buffer itself.  In order to read, threads wait until 
- the data associated with the block is valid, reads, and then notifies any wating 
- threads that they can acces the block.  To write, threads copy the information 
- and the notify waiting threads that they are done when finished.  MyDBufferCache 
- represents the actual cache itself, and stores a reference to the virtual disk, a 
- list of least recently used blocks, and a map of block numbers to acual 
+ the data associated with the block is valid, reads, and then reads and releases the
+ block.  To write, threads copy the information, and then release the block.  
+ MyDBufferCache represents the actual cache itself, and stores a reference to the virtual disk, a 
+ list of least recently used blocks, and a map of block numbers to actual 
  DBuffers.  The getBlock method in MyDBufferCache return a DBuffer object to the 
  DFS by accessing the map using the given blockID and if it is in the map, 
  returning the block and updating the LRU list.  If the associated block is not in 
  the map, the class checks to see if the cache is full, and if it is, removes the 
- LRU cache block from the cache and creates a new block for the associated data.  
+ LRU cache block which is not busy from the cache and creates a new block for 
+ the associated data.  It makes sure to push any dirty changes before finishing.
  Reads and writes from threads are stored in the cache and dirty blocks are 
  written to the disk on a sync() call.
 
@@ -133,7 +137,10 @@
  * improve the lab.
  * */
 
- Generally a solid lab
+ Generally a solid lab, difficult to understand at first but once we got a 
+ solid grasp it was enjoyable building the filing system. It could be helpful
+ to provide tests in the future as we found it difficult to build tests
+ that hit every facet of the system.
 
 /************************
  * References
