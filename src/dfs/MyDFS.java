@@ -133,7 +133,6 @@ public class MyDFS extends DFS{
 
 	@Override
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
-		// TODO Auto-generated method stub
 		//logic to pull each individual block i dont feel like writing it now
 		 DFile file = myFileIDMap.get(dFID.getDFileID());
 		 
@@ -143,19 +142,23 @@ public class MyDFS extends DFS{
 	        int done = count;
 
 	        for (int i = 0; i < numblocks; i++) {
-	            DBuffer d = dBuffCache.getBlock(file.getPhysicalBlockNumber(i));
-	            if (!d.checkValid()) {
-	                d.startFetch();
-	                d.waitValid();
-	            }
+	        	if(done > 0){
+	        		DBuffer d = dBuffCache.getBlock(file.getPhysicalBlockNumber(i));
+	        		if (!d.checkValid()) {
+	        			d.startFetch();
+	        			d.waitValid();
+	        		}
 
-	            int read = d.read(buffer, offset, done);
-	            done -= read;
-	            offset += read;
+
+	        		int read = d.read(buffer, offset, done);
+	        		done -= read;
+	        		offset += read;
+	        	}
 	        }
 	       
 	        return count;
 	}
+	
 	@Override
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		//same as above but make sure to have a check to see if need to add more blocks to file
