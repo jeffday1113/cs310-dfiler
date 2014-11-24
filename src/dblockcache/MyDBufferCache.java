@@ -60,6 +60,7 @@ public class MyDBufferCache extends DBufferCache{
 		
 	}
 
+	
 	@Override
 	public synchronized void sync() {
 		for(DBuffer d : mapOfDBuffs.values()){
@@ -67,12 +68,11 @@ public class MyDBufferCache extends DBufferCache{
 				try {
 					disk.startRequest(d, Constants.DiskOperationType.WRITE);
 				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				} 
 			}
 		}
 	}
