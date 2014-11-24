@@ -62,16 +62,17 @@ public class MyDBufferCache extends DBufferCache{
 
 	@Override
 	public synchronized void sync() {
-		// TODO Auto-generated method stub
-		for(DBuffer d : dirtyList){
-			try {
-				disk.startRequest(d, Constants.DiskOperationType.WRITE);
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		for(DBuffer d : mapOfDBuffs.values()){
+			if(!d.checkClean()){
+				try {
+					disk.startRequest(d, Constants.DiskOperationType.WRITE);
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
