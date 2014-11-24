@@ -8,15 +8,15 @@
 
 	Name1: Jeffrey Day
 	NetId1: jrd22
-	Time spent: 10 hours
+	Time spent: 12 hours
 
 	Name2: Andrew Gauthier
 	NetId2: ajg45
-	Time spent: 10 hours
+	Time spent: 12 hours
 
 	Name3: Clive Mudanda
 	NetId3: cmm85
-	Time spent: 10 hours
+	Time spent: 12 hours
 
 /******************
  * Files to submit
@@ -45,6 +45,75 @@
  * details to maximize your partial credit.  
  * */
 
+ While working on this lab, as suggested by the given PDF we divided our filing 
+ system into three primary layers: the DFS at the top, the dbuffercache in the 
+ middle, and the virtual disk at the bottom.
+
+ DFS
+
+ The implementation of our DFS consists of two primary classes: MyDFS (which 
+ implements the DFS interface given to us from the source code) and DFile.  The 
+ DFile class represents an actual file in our filing system and encapsulates all 
+ of the data associated with a given file (name/ID number, list of disk blocks 
+ associated with the file, the size of the file, number of readers and the number 
+ of writers).  The class also implements the details of dealing with multiple 
+ threads attempting to read and write to the same file by utilizing synchronized 
+ methods to incorporate locking.  The MyDFS class holds information regarding the 
+ state of the entire filing system (allocated and freed blocks, map associating 
+ fileID number with the actual file in the system, an instantiation of the 
+ dbuffcache) and is the entry point into the file system.  Every test program 
+ starts by calling DFS.init(), which instantiates a dbuffcache and a virtual 
+ disk.  It then grabs block 0 from the dbuffcache and checks to see whether the 
+ disk is valid.  Then, the inode blocks are scanned in from the dbuffcache and 
+ files are recreated from the information stored in the inodes.  All the necessary state 
+ stored in the DFS class is updated as well.  The DFS class also implements all 
+ the necessary methods create, destroy, read, and write dfiles.  To create a file, 
+ the DFS makes a new DFileID object with the lowest available file ID number, 
+ allocates a block to that file, creates the file, updates the fileIDMap, and then 
+ loads it into the dbuffcache.  To destroy a file, the allocated blocks associated 
+ with the file are added back to the free list.  In order to read a file, the DFS 
+ loops through the blocks associated with that file in the map, gets a DBuffer for 
+ each block, and reads the data into a byte array while dealing with acquiring and 
+ releasing of the read lock.  To write to a file, the DFS allocates more blocks to 
+ the file to fit any more data that needs to be written, gets a DBuffer for each 
+ block, writes the given byte array to the blocks and then releases the blocks to 
+ be used later.  We also implemented private methods that create inodes for files 
+ and can instantiate a file from an inode
+
+ DBufferCache
+
+ The cache layer is implemented in two primary classes: MyDBuffer and 
+ MyDBufferCache.  MyDBuffer represents a cache block in the simulated I/O cache 
+ that stores data from disk and stores the state of the cache blocks (whether or 
+ not it is busy, clean, and valid, the actual data itself).  MyDBufferCache 
+ represents the actual cache itself, and stores a reference to the virtual disk, a 
+ list of least recently used blocks, and a map of block numbers to acual 
+ DBuffers.  The getBlock method in MyDBufferCache return a DBuffer object to the 
+ DFS by accessing the map using the given blockID and if it is in the map, 
+ returning the block and updating the LRU list.  If the associated block is not in 
+ the map, the class checks to see if the cache is full, and if it is, removes the 
+ LRU cache block from the cache and creates a new block for the associated data.  
+ Reads and writes from threads are stored in the cache and dirty blocks are 
+ written to the disk on a sync() call.
+
+ VirtualDisk
+
+ The third and lowest layer of our dfiler is the VirtualDisk, primarily 
+ implemented in MyVirtualDisk along with the DiskRequest class.  The DiskRequest 
+ class stores information regarding a given request for information from disk (the 
+ associated DBuffer and whether it is a read or write to the file associated with 
+ the buffer).  The primary data store in the MyVirtualDisk class is a queue of 
+ DiskRequests.  The run() method of the class is synchronized with regards to the 
+ requestqueue so that multiple threads are not reading and writing data to the 
+ disk at the same time which could result in race conditions that would store bad 
+ data.  If the requestqueue is empty, then the disk waits until a new request is 
+ added to the queue which notifies it to wake up and continue running (like 
+ producer consumer problem).  To process a request, the disk either reads or 
+ writes to the associated Dbuffer and calls iocomplete on the buffer when finished 
+ to let the buffer know that it is done.  All of these operations are 
+ asynchronous.  
+
+
 /************************
  * Feedback on the lab
  ************************/
@@ -54,6 +123,8 @@
  * improve the lab.
  * */
 
+ Generally a solid lab
+
 /************************
  * References
  ************************/
@@ -61,3 +132,5 @@
 /*
  * List of collaborators involved including any online references/citations.
  * */
+
+ Stackoverflow
